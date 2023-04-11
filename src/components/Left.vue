@@ -121,12 +121,16 @@ function gotoConnect() {
   setTimeout(() => {
     n?.close();
     roomNum.value &&
-      getRoomInfoApi(roomNum.value).then((res: any) => {
-        // console.log(res);
-        roomAvatar.value = res.avatar;
-        roomTitle.value = res.roomTitle;
-        connection(res.roomId, res.uniqueId);
-      });
+      getRoomInfoApi(roomNum.value)
+        .then((res: any) => {
+          // console.log(res);
+          roomAvatar.value = res.avatar;
+          roomTitle.value = res.roomTitle;
+          connection(res.roomId, res.uniqueId);
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
   }, 2000);
 }
 
@@ -251,6 +255,7 @@ function relayMess(data: Mess) {
   }
   .dy-room-box {
     max-width: 420px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -260,16 +265,19 @@ function relayMess(data: Mess) {
     box-sizing: border-box;
     margin: 12px 8px;
     margin-bottom: 24px;
+    flex-shrink: 0;
     &.error {
       border-color: #fa5232;
     }
     .dy-room-tag {
-      height: 100%;
+      flex-shrink: 0;
       text-align: center;
-      padding: 8px 12px;
+      padding: 0 12px;
       box-sizing: border-box;
     }
     .dy-room-input {
+      min-width: 114px;
+      height: 100%;
       font-size: 14px;
       color: #5c4f55;
       flex-grow: 1;

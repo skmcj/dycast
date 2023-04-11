@@ -40,7 +40,7 @@
         </dynamic-scroller>
       </div>
       <!-- 返回底部盒子 -->
-      <div v-if="isStopScroll" class="rt-bt-box" @click.stop="returnBottom">
+      <div v-if="isStopScroll && chatList!.length > 0" class="rt-bt-box" @click.stop="returnBottom">
         <span>固定底部</span>
         <span class="icon">︾</span>
       </div>
@@ -89,6 +89,7 @@ function returnBottom() {
  * 点击停止自动滚动
  */
 function onStopScrollOfList() {
+  if (chatList!.length <= 0) return;
   setIsStopScroll && setIsStopScroll(true);
 }
 </script>
@@ -114,6 +115,7 @@ function onStopScrollOfList() {
   }
 }
 .mess-h {
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;

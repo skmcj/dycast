@@ -25,7 +25,7 @@ provide('setIsStopScroll', (value: boolean) => {
 });
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .main {
   width: 100vw;
   height: 100vh;
@@ -36,6 +36,20 @@ provide('setIsStopScroll', (value: boolean) => {
   }
   .right {
     width: 55%;
+  }
+}
+@media screen and (max-width: 768px) {
+  .main {
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    .left,
+    .right {
+      width: 100%;
+    }
+    .mess-c {
+      height: 640px;
+    }
   }
 }
 </style>
