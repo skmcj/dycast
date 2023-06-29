@@ -1,7 +1,6 @@
-
 interface Entry {
-  key: string
-  value: string
+  key: string;
+  value: string;
 }
 
 /**
@@ -11,20 +10,19 @@ class Client {
   private socket;
 
   constructor(wsUrl: string) {
-    "undefined" != typeof WebSocket && (this.socket = new WebSocket(wsUrl),
-    this.socket.binaryType = "arraybuffer")
+    'undefined' != typeof WebSocket && ((this.socket = new WebSocket(wsUrl)), (this.socket.binaryType = 'arraybuffer'));
   }
   onError(cb: (e: Event) => void) {
-      this.socket?.addEventListener("error", cb);
+    this.socket?.addEventListener('error', cb);
   }
   onMessage(cb: (e: MessageEvent) => void) {
-      this.socket?.addEventListener("message", cb);
+    this.socket?.addEventListener('message', cb);
   }
   onOpen(cb: () => void) {
-      this.socket?.addEventListener("open", cb);
+    this.socket?.addEventListener('open', cb);
   }
   onClose(cb: (e: CloseEvent) => void) {
-      this.socket?.addEventListener("close", cb);
+    this.socket?.addEventListener('close', cb);
   }
   /**
    * 向服务端发送消息
@@ -46,7 +44,7 @@ export class DyClient {
   private wsUrl: string;
   private pingStarted: boolean = !1;
   private pingTimer: number | undefined;
-  
+
   public heartbeatDuration: number = 0;
 
   public onOpen: (() => void) | undefined;
@@ -69,61 +67,80 @@ export class DyClient {
     }
     this.wsUrl = wsUrl;
     this.client = new Client(wsUrl);
-    this.client.onOpen(this.onOpen ? this.onOpen : () => {
-      this.pingStarted = !0;
-      this.ping();
-      this.onOff && this.onOff(true);
-    });
-    this.client.onClose(this.onClose ? this.onClose : (e: CloseEvent) => {
-      this.pingStarted && (console.log('socket close ......', e.type), this.pingStarted = !1);
-      this.onOff && this.onOff(false);
-    });
-    this.client.onError(this.onError ? this.onError : (e: Event) => {
-      this.pingStarted = !1;
-      console.error('[socket error]: ', e);
-      this.onOff && this.onOff(false);
-    });
-    this.client.onMessage(this.onMessage ? this.onMessage : (e: MessageEvent) => {
-      if(this.client) {
-        const frame: proto.PushFrame = proto.PushFrame.deserializeBinary(e.data);
-        let headers = frame.getHeaderslistMap().map_;
-        let gzipFlag = false;
-        for (const t of Object.values<Entry>(headers)) {
-          if ("compress_type" === t.key && "gzip" === t?.value) {
-            gzipFlag = true;
+    this.client.onOpen(
+      this.onOpen
+        ? this.onOpen
+        : () => {
+            this.pingStarted = !0;
+            this.ping();
+            this.onOff && this.onOff(true);
           }
-        }
-        let payload: Uint8Array = gzipFlag ? pako.inflate(frame.getPayload()) : frame.getPayload_asU8();
-        const res: proto.Response = proto.Response.deserializeBinary(payload);
-        if(res.getNeedack()) {
-          let ext = res.getInternalext();
-          const sf = new proto.PushFrame();
-          sf.setPayloadtype('ack');
-          sf.setPayload(function(e) {
-              const t = [];
-              for (const i of e) {
-                  const e = i.charCodeAt(0);
-                  e < 128 ? t.push(e) : e < 2048 ? (t.push(192 + (e >> 6)),
-                  t.push(128 + (63 & e))) : e < 65536 && (t.push(224 + (e >> 12)),
-                  t.push(128 + (e >> 6 & 63)),
-                  t.push(128 + (63 & e)))
+    );
+    this.client.onClose(
+      this.onClose
+        ? this.onClose
+        : (e: CloseEvent) => {
+            this.pingStarted && (console.log('socket close ......', e.type), (this.pingStarted = !1));
+            this.onOff && this.onOff(false);
+          }
+    );
+    this.client.onError(
+      this.onError
+        ? this.onError
+        : (e: Event) => {
+            this.pingStarted = !1;
+            console.error('[socket error]: ', e);
+            this.onOff && this.onOff(false);
+          }
+    );
+    this.client.onMessage(
+      this.onMessage
+        ? this.onMessage
+        : (e: MessageEvent) => {
+            if (this.client) {
+              const frame: proto.PushFrame = proto.PushFrame.deserializeBinary(e.data);
+              let headers = frame.getHeaderslistMap().map_;
+              let gzipFlag = false;
+              for (const t of Object.values<Entry>(headers)) {
+                if ('compress_type' === t.key && 'gzip' === t?.value) {
+                  gzipFlag = true;
+                }
               }
-              return Uint8Array.from(t)
-          }(ext));
-          sf.setLogid(frame.getLogid());
-          this.client.send(sf.serializeBinary());
-        }
-        res.getMessagesList().forEach((message: proto.Message) => {
-          this.accept && (this.accept(message));
-          // console.log(message.getMethod());
-        });
-      }
-    });
+              let payload: Uint8Array = gzipFlag ? pako.inflate(frame.getPayload()) : frame.getPayload_asU8();
+              const res: proto.Response = proto.Response.deserializeBinary(payload);
+              if (res.getNeedack()) {
+                let ext = res.getInternalext();
+                const sf = new proto.PushFrame();
+                sf.setPayloadtype('ack');
+                sf.setPayload(
+                  (function (e) {
+                    const t = [];
+                    for (const i of e) {
+                      const e = i.charCodeAt(0);
+                      e < 128
+                        ? t.push(e)
+                        : e < 2048
+                        ? (t.push(192 + (e >> 6)), t.push(128 + (63 & e)))
+                        : e < 65536 && (t.push(224 + (e >> 12)), t.push(128 + ((e >> 6) & 63)), t.push(128 + (63 & e)));
+                    }
+                    return Uint8Array.from(t);
+                  })(ext)
+                );
+                sf.setLogid(frame.getLogid());
+                this.client.send(sf.serializeBinary());
+              }
+              res.getMessagesList().forEach((message: proto.Message) => {
+                this.accept && this.accept(message);
+                // console.log(message.getMethod());
+              });
+            }
+          }
+    );
   }
 
   ping() {
     const t = Math.max(1e4, Number(this.heartbeatDuration));
-    if(this.client && this.client.ready() === 1) {
+    if (this.client && this.client.ready() === 1) {
       const frame = new proto.PushFrame();
       frame.setPayloadtype('hb');
       this.client.send(frame.serializeBinary());
@@ -132,56 +149,57 @@ export class DyClient {
       this.pingStarted && this.ping();
     }, t);
   }
-
 }
 
-
 interface Mess {
-  id: number,
-  type: string | undefined,
-  content: string,
-  nickname: string,
+  id: number;
+  type: string | undefined;
+  content: string;
+  nickname: string;
   /**
    * 在线观众
    */
-  memberCount: number,
+  memberCount: number;
   /**
    * 点赞数
    */
-  likeCount: number,
+  likeCount: number;
   /**
    * 主播粉丝数
    */
-  followCount: number,
+  followCount: number;
   /**
    * 累计观看人数
    */
-  totalUserCount: number,
-  rank: RankItem[]
-  gift: Gift
+  totalUserCount: number;
+  rank: RankItem[];
+  gift: Gift;
 }
 
 interface Gift {
-  name: string,
-  count: number,
-  url: string,
-  desc: string
+  name: string;
+  // 礼物数量
+  count: number;
+  url: string;
+  desc: string;
+  // 单个价值-抖音币
+  diamondCount?: number;
 }
 
 /**
  * 送礼点赞榜
  */
 interface RankItem {
-  nickname: string,
-  avatar: string,
-  rank: number
+  nickname: string;
+  avatar: string;
+  rank: number;
 }
 
 /**
  * 处理消息
- * @param message 
+ * @param message
  */
-export const handleMessage = function(message: proto.Message) {
+export const handleMessage = function (message: proto.Message) {
   let method = message.getMethod();
   let data: any;
   let chat: Mess = {
@@ -201,7 +219,7 @@ export const handleMessage = function(message: proto.Message) {
       desc: ''
     }
   };
-  switch(method) {
+  switch (method) {
     // 进入
     case 'WebcastMemberMessage':
       data = proto.MemberMessage.deserializeBinary(message.getPayload());
@@ -242,7 +260,8 @@ export const handleMessage = function(message: proto.Message) {
       chat.content = data.getCommon().getDescribe();
       chat.gift.name = data.getGift().getName();
       chat.gift.desc = data.getGift().getDescribe();
-      chat.gift.count = data.getGift().getDiamondcount();
+      chat.gift.count = data.getRepeatcount();
+      chat.gift.diamondCount = data.getGift().getDiamondcount();
       chat.gift.url = data.getGift().getImage().getUrllistList()[0];
       break;
     // 直播间统计
@@ -253,7 +272,7 @@ export const handleMessage = function(message: proto.Message) {
       chat.memberCount = data.getTotal();
       chat.totalUserCount = data.getTotaluser();
       let rank = data.getRanksList();
-      for(let item of rank) {
+      for (let item of rank) {
         let rankItem: RankItem = {
           nickname: item.getUser().getNickname(),
           avatar: item.getUser().getAvatarthumb().getUrllistList()[0],
@@ -265,4 +284,4 @@ export const handleMessage = function(message: proto.Message) {
   }
   chat.id = data?.getCommon().getMsgid();
   return chat;
-}
+};

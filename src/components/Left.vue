@@ -208,7 +208,7 @@ function renewPos() {
   if (!messListDom) {
     messListDom = document.getElementById('mess-list');
   }
-  console.log(isStopScroll?.value);
+  // console.log(isStopScroll?.value);
   if (!isStopScroll?.value) {
     messListDom &&
       messListDom.scrollTo({ top: messListDom.scrollHeight - messListDom.clientHeight, behavior: 'smooth' });

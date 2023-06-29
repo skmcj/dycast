@@ -54,6 +54,69 @@
 
   - 以上的`PushFrame`、`··· ···`均为弹幕数据的`proto`结构，具体可自行通过一些逆向工程解析。
 
+## 数据结构
+
+包装传给后台的数据
+
+```typescript
+interface Mess {
+  id: number;
+  /**
+   * 消息类型
+   * member - 进入直播间 | social - 关注主播 | chat - 文本弹幕 | gift - 礼物信息 | like - 点赞 | room - 房间统计
+   */
+  type: string | undefined;
+  // 文本内容
+  content: string;
+  // from用户昵称
+  nickname: string;
+  /**
+   * 在线观众数
+   */
+  memberCount: number;
+  /**
+   * 点赞数
+   */
+  likeCount: number;
+  /**
+   * 主播粉丝数
+   */
+  followCount: number;
+  /**
+   * 累计观看人数
+   */
+  totalUserCount: number;
+  // 送礼、点赞排行榜信息
+  rank: RankItem[];
+  // 礼物信息
+  gift: Gift;
+}
+
+interface Gift {
+  // 礼物名称
+  name: string;
+  // 礼物数量
+  count: number;
+  // 礼物图片链接
+  url: string;
+  // 描述
+  desc: string;
+  // 礼物单个价值-抖音币
+  diamondCount?: number;
+}
+
+interface RankItem {
+  // 用户昵称
+  nickname: string;
+  // 用户头像
+  avatar: string;
+  // 用户排名
+  rank: number;
+}
+```
+
+**注意：** 理论上，接收的原始弹幕数据包含抖音弹幕该有的全部数据，但传递给后台的目前只包装了以上较为重要的数据，如需其它数据，可自行研究包装修改，目标文件为`client.ts`。
+
 ## 项目预览
 
 完整项目演示，请移步[哔哩哔哩](https://www.bilibili.com/video/BV1Vj411c7FF/)
@@ -91,6 +154,43 @@
     ```sh
     npm run build
     ```
+
+- 项目部署到`nginx`
+
+  ```nginx
+  # 配置网络监听
+  server {
+      # 监听端口号，如：1234
+      listen       1234;
+      # 监听地址，可以是域名或ip地址，可正则书写
+      server_name  localhost;
+  
+      # 配置项目根路径资源
+      location / {
+          add_header Access-Control-Allow-Origin *;
+          # 根目录，可以是项目的本地路径
+          root   /var/dycast;
+          # 配置默认主页文件
+          index  index.html index.htm;
+          # 配置单页面应用刷新问题，默认返回主页
+          try_files $uri $uri/ /index.html;
+      }
+      # 配置接口跨域
+      # 将 /dy/ 路径下的请求代理到 https://live.douyin.com/
+      location /dy/ {
+          # 响应头大小
+          proxy_buffer_size 64k;
+          # 响应体大小 = 数量 * size
+          proxy_buffers   32 64k;
+          # 处于busy状态的buffer大小，一般为 proxy_buffer_size * 2
+          proxy_busy_buffers_size 128k;
+          # proxy_pass 你要跨域的的接口地址
+          proxy_pass https://live.douyin.com/;
+      }
+  }
+  ```
+
+  
 
 ## 免责声明
 
