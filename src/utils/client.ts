@@ -256,6 +256,13 @@ export const handleMessage = function (message: proto.Message) {
     case 'WebcastGiftMessage':
       data = proto.GiftMessage.deserializeBinary(message.getPayload());
       chat.type = 'gift';
+      // 礼物信息
+      // console.log(
+      //   data.getUser().getNickname(),
+      //   data.getCommon().getMsgid(),
+      //   data.getGift().getName(),
+      //   data.getRepeatcount()
+      // );
       chat.nickname = data.getUser().getNickname();
       chat.content = data.getCommon().getDescribe();
       chat.gift.name = data.getGift().getName();

@@ -16,7 +16,7 @@
               :item="item"
               :active="active"
               :size-dependencies="[item.content]"
-              :data-index="index">
+              :data-index="item.id">
               <div class="mess-l-item">
                 <div class="item-name">{{ item.nickname }}</div>
                 <div class="item-content-box">

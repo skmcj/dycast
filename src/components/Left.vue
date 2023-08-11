@@ -126,7 +126,12 @@ function gotoConnect() {
           // console.log(res);
           roomAvatar.value = res.avatar;
           roomTitle.value = res.roomTitle;
-          connection(res.roomId, res.uniqueId);
+          if (!res.roomId || !res.uniqueId) {
+            // 房间ID和uniqueID获取失败
+            connectCode.value = 400;
+          } else {
+            connection(res.roomId, res.uniqueId);
+          }
         })
         .catch((err: any) => {
           console.log(err);
