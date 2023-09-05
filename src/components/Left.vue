@@ -126,6 +126,7 @@ function gotoConnect() {
           // console.log(res);
           roomAvatar.value = res.avatar;
           roomTitle.value = res.roomTitle;
+          console.log('room', res);
           if (!res.roomId || !res.uniqueId) {
             // 房间ID和uniqueID获取失败
             connectCode.value = 400;

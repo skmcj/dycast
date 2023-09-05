@@ -9,13 +9,37 @@ export const getRoomInfoApi = function (roomNumber: string) {
     .get(`/dy/${roomNumber}`)
     .then((res: any) => {
       let html = res.data;
-      let str = html.match(/<script id="RENDER_DATA" type="application\/json">(.*?)<\/script>/g);
-      let dict = JSON.parse(decodeURIComponent(str?.[0].slice(49, -9)));
-      let roomId = dict['app']['initialState']['roomStore']['roomInfo']['roomId'];
-      let roomTitle = dict['app']['initialState']['roomStore']['roomInfo']['room']['title'];
-      let roomUserCount = dict['app']['initialState']['roomStore']['roomInfo']['room']['user_count_str'];
-      let uniqueId = dict['app']['odin']['user_unique_id'];
-      let avatar = dict['app']['initialState']['roomStore']['roomInfo']['anchor']['avatar_thumb']['url_list'][0];
+      const matchRes = html.match(
+        /<script\snonce=\"\S+?\"\s>self\.__pace_f\.push\(\[1,\"c:\[\\\"\$\\\",\\\"\$L13\\\",null,([\s\S]+?)]\\n\"\]\)<\/script>/
+      );
+      const REGLIST = [
+        {
+          reg: /\\{1,7}"/g,
+          str: '"'
+        },
+        {
+          reg: /"\{/g,
+          str: '{'
+        },
+        {
+          reg: /\}"/g,
+          str: '}'
+        }
+      ];
+      if (!matchRes) throw new Error('房间信息获取失败');
+      // 获取目标信息编码字符串，替换其中的转义字符
+      let json: string = matchRes[1];
+      for (const REG of REGLIST) {
+        json = json.replace(REG.reg, REG.str);
+      }
+      // let dict = JSON.parse(decodeURIComponent(matchRes[1]));
+      const dict = JSON.parse(json);
+      let roomId = dict['state']['roomStore']['roomInfo']['roomId'];
+      let roomTitle = dict['state']['roomStore']['roomInfo']['room']['title'];
+      let roomUserCount = dict['state']['roomStore']['roomInfo']['room']['user_count_str'];
+      let uniqueId = dict['state']['userStore']['odin']['user_unique_id'];
+      let avatar = dict['state']['roomStore']['roomInfo']['anchor']['avatar_thumb']['url_list'][0];
+      console.log(dict);
       return {
         roomId,
         roomTitle,
