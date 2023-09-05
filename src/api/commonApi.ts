@@ -39,7 +39,6 @@ export const getRoomInfoApi = function (roomNumber: string) {
       let roomUserCount = dict['state']['roomStore']['roomInfo']['room']['user_count_str'];
       let uniqueId = dict['state']['userStore']['odin']['user_unique_id'];
       let avatar = dict['state']['roomStore']['roomInfo']['anchor']['avatar_thumb']['url_list'][0];
-      console.log(dict);
       return {
         roomId,
         roomTitle,
