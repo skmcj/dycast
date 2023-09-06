@@ -24,6 +24,14 @@ export const getRoomInfoApi = function (roomNumber: string) {
         {
           reg: /\}"/g,
           str: '}'
+        },
+        {
+          reg: /"\[/g,
+          str: '['
+        },
+        {
+          reg: /\]"/g,
+          str: ']'
         }
       ];
       if (!matchRes) throw new Error('房间信息获取失败');
