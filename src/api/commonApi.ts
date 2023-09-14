@@ -9,8 +9,11 @@ export const getRoomInfoApi = function (roomNumber: string) {
     .get(`/dy/${roomNumber}`)
     .then((res: any) => {
       let html = res.data;
+      // const matchRes = html.match(
+      //   /<script\snonce=\"\S+?\"\s>self\.__pace_f\.push\(\[1,\"c:\[\\\"\$\\\",\\\"\$L\d?\\\",null,([\s\S]+?)\]\\n\"\]\)<\/script>/
+      // );
       const matchRes = html.match(
-        /<script\snonce=\"\S+?\"\s>self\.__pace_f\.push\(\[1,\"c:\[\\\"\$\\\",\\\"\$L13\\\",null,([\s\S]+?)]\\n\"\]\)<\/script>/
+        /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?)\]\\n"\]\)<\/script>/
       );
       const REGLIST = [
         {
