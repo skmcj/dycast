@@ -184,6 +184,8 @@ interface Gift {
   desc: string;
   // 单个价值-抖音币
   diamondCount?: number;
+  // 可能为重复参数，大于0时为重复的
+  repeatEnd?: number;
 }
 
 /**
@@ -257,12 +259,18 @@ export const handleMessage = function (message: proto.Message) {
       data = proto.GiftMessage.deserializeBinary(message.getPayload());
       chat.type = 'gift';
       // 礼物信息
-      // console.log(
-      //   data.getUser().getNickname(),
-      //   data.getCommon().getMsgid(),
-      //   data.getGift().getName(),
-      //   data.getRepeatcount()
-      // );
+      // console.log({
+      //   username: data.getUser().getNickname(),
+      //   msgId: data.getCommon().getMsgid(),
+      //   logId: data.getLogid(),
+      //   giftName: data.getGift().getName(),
+      //   giftId: data.getGiftid(),
+      //   repeatEnd: data.getRepeatend(),
+      //   isShowMsg: data.getCommon().getIsshowmsg(),
+      //   count: data.getRepeatcount(),
+      //   describe: data.getCommon().getDescribe(),
+      //   commonCreateTime: data.getCommon().getCreatetime()
+      // });
       chat.nickname = data.getUser().getNickname();
       chat.content = data.getCommon().getDescribe();
       chat.gift.name = data.getGift().getName();
@@ -270,6 +278,7 @@ export const handleMessage = function (message: proto.Message) {
       chat.gift.count = data.getRepeatcount();
       chat.gift.diamondCount = data.getGift().getDiamondcount();
       chat.gift.url = data.getGift().getImage().getUrllistList()[0];
+      chat.gift.repeatEnd = data.getRepeatend();
       break;
     // 直播间统计
     case 'WebcastRoomUserSeqMessage':
