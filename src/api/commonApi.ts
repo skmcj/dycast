@@ -9,42 +9,15 @@ export const getRoomInfoApi = function (roomNumber: string) {
     .get(`/dy/${roomNumber}`)
     .then((res: any) => {
       let html = res.data;
-      // const matchRes = html.match(
-      //   /<script\snonce=\"\S+?\"\s>self\.__pace_f\.push\(\[1,\"c:\[\\\"\$\\\",\\\"\$L\d?\\\",null,([\s\S]+?)\]\\n\"\]\)<\/script>/
-      // );
       const matchRes = html.match(
         /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?)\]\\n"\]\)<\/script>/
       );
-      const REGLIST = [
-        {
-          reg: /\\{1,7}"/g,
-          str: '"'
-        },
-        {
-          reg: /"\{/g,
-          str: '{'
-        },
-        {
-          reg: /\}"/g,
-          str: '}'
-        },
-        {
-          reg: /"\[/g,
-          str: '['
-        },
-        {
-          reg: /\]"/g,
-          str: ']'
-        }
-      ];
-      if (!matchRes) throw new Error('房间信息获取失败');
-      // 获取目标信息编码字符串，替换其中的转义字符
       let json: string = matchRes[1];
-      for (const REG of REGLIST) {
-        json = json.replace(REG.reg, REG.str);
+      function removeEscapes(jsonString: string) {
+        // 使用正则表达式去除转义的双引号和反斜杠
+        return jsonString.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
       }
-      // let dict = JSON.parse(decodeURIComponent(matchRes[1]));
-      const dict = JSON.parse(json);
+      const dict = JSON.parse(removeEscapes(json));
       let roomId = dict['state']['roomStore']['roomInfo']['roomId'];
       let roomTitle = dict['state']['roomStore']['roomInfo']['room']['title'];
       let roomUserCount = dict['state']['roomStore']['roomInfo']['room']['user_count_str'];
