@@ -1,0 +1,203 @@
+/* 抖音美好体 */
+@font-face {
+  font-family: 'dymht';
+  ;
+  src: url('./DouyinSansBold.otf') format('opentype');
+}
+
+/* 猫啃忘形圆 */
+@font-face {
+  font-family: 'mkwxy';
+  src: url('./MaoKenWangXingYuan.ttf') format('truetype');
+}
+
+/* 图标 */
+@font-face {
+  font-family: "castfont";
+  src: url('castfont.ttf') format('truetype');
+}
+
+[class*=' ice-'],
+[class^='ice-'] {
+  font-family: 'castfont' !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.castfont {
+  font-family: "castfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ice-fullscreen:before {
+  content: "\e658";
+}
+
+.ice-fullscreen-exit:before {
+  content: "\e659";
+}
+
+.ice-cast-wall-f:before {
+  content: "\e657";
+}
+
+.ice-file:before {
+  content: "\e689";
+}
+
+.ice-data:before {
+  content: "\e6da";
+}
+
+.ice-qr:before {
+  content: "\e634";
+}
+
+.ice-thank:before {
+  content: "\e727";
+}
+
+.ice-dir:before {
+  content: "\100d9";
+}
+
+.ice-coin:before {
+  content: "\e651";
+}
+
+.ice-add:before {
+  content: "\e6a7";
+}
+
+.ice-label:before {
+  content: "\e63d";
+}
+
+.ice-room-id:before {
+  content: "\e622";
+}
+
+.ice-record:before {
+  content: "\e642";
+}
+
+.ice-img:before {
+  content: "\e61e";
+}
+
+.ice-keyword:before {
+  content: "\e6d0";
+}
+
+.ice-stat:before {
+  content: "\e620";
+}
+
+.ice-opacity:before {
+  content: "\e724";
+}
+
+.ice-clock:before {
+  content: "\e631";
+}
+
+.ice-checkmark:before {
+  content: "\e715";
+}
+
+.ice-arrow-top:before {
+  content: "\e684";
+}
+
+.ice-arrow-left-copy:before {
+  content: "\e77d";
+}
+
+.ice-arrow-right-copy:before {
+  content: "\e77e";
+}
+
+.ice-arrow-bottom-copy:before {
+  content: "\e77f";
+}
+
+.ice-stick:before {
+  content: "\e677";
+}
+
+.ice-minimize:before {
+  content: "\e668";
+}
+
+.ice-maximize:before {
+  content: "\e65d";
+}
+
+.ice-close-b:before {
+  content: "\e661";
+}
+
+.ice-maximize-o:before {
+  content: "\e692";
+}
+
+.ice-cast-wall:before {
+  content: "\e653";
+}
+
+.ice-cast:before {
+  content: "\e601";
+}
+
+.ice-save:before {
+  content: "\e636";
+}
+
+.ice-copy:before {
+  content: "\e60c";
+}
+
+.ice-setting:before {
+  content: "\e771";
+}
+
+.ice-ip:before {
+  content: "\e77c";
+}
+
+.ice-port:before {
+  content: "\e643";
+}
+
+.ice-config:before {
+  content: "\e618";
+}
+
+.ice-close:before {
+  content: "\e69a";
+}
+
+.ice-help:before {
+  content: "\e6a3";
+}
+
+.ice-info:before {
+  content: "\e6a4";
+}
+
+.ice-success:before {
+  content: "\e6b1";
+}
+
+.ice-warn:before {
+  content: "\e6b6";
+}
+
+.ice-error:before {
+  content: "\e6b7";
+}
