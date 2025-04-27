@@ -15,7 +15,9 @@
         <LiveStatusPanel ref="panel" :status="connectStatus" />
       </div>
     </div>
-    <div class="view-center"></div>
+    <div class="view-center">
+      <CastList :types="['chat', 'gift']" ref="castEl" />
+    </div>
     <div class="view-right">
       <div class="view-input">
         <ConnectInput
@@ -37,7 +39,9 @@
           @confirm="relayCast"
           @cancel="stopRelayCast" />
       </div>
-      <div class="view-other"></div>
+      <div class="view-other">
+        <CastList ref="otherEl" :types="['social', 'like', 'member']" pos="left" no-prefix theme="dark" />
+      </div>
     </div>
   </div>
 </template>
@@ -46,6 +50,7 @@
 import ConnectInput from '@/components/ConnectInput.vue';
 import LiveInfo from '@/components/LiveInfo.vue';
 import LiveStatusPanel from '@/components/LiveStatusPanel.vue';
+import CastList from '@/components/CastList.vue';
 import { type ConnectStatus, type DyLiveInfo, type LiveRoom } from '@/core/dycast';
 import { verifyRoomNum, verifyWsUrl } from '@/utils/verifyUtil';
 import { ref, useTemplateRef } from 'vue';
@@ -72,6 +77,11 @@ const followCount = ref<string | number>('*****');
 const memberCount = ref<string | number>('*****');
 const userCount = ref<string | number>('*****');
 const likeCount = ref<string | number>('*****');
+
+// 主要弹幕
+const castRef = useTemplateRef('castEl');
+// 其它弹幕
+const otherRef = useTemplateRef('otherEl');
 
 /**
  * 验证房间号

@@ -39,3 +39,84 @@ export interface DyLiveInfo {
   title: string;
   status: number;
 }
+
+/**
+ * 送礼点赞榜
+ */
+export interface LiveRankItem {
+  nickname: string;
+  avatar: string;
+  rank: number | string;
+}
+
+export interface CastUser {
+  // user.sec_uid | user.id_str
+  id?: string;
+  // user.nickname
+  name?: string;
+  // user.avatar_thumb.url_list.0
+  avatar?: string;
+  // 性别 0 | 1 | 2 => 未知 | 男 | 女
+  gender?: number;
+}
+
+export interface CastGift {
+  id?: string;
+  name?: string;
+  // 抖音币 diamond_count
+  price?: number;
+  type?: number;
+  // 描述
+  desc?: string;
+  // 图片
+  icon?: string;
+  // 数量 repeat_count | combo_count
+  count?: number | string;
+  // 礼物消息可能重复发送，0 表示第一次，未重复
+  repeatEnd?: number;
+}
+
+/**
+ * 富文本类型
+ *  1 - 普通文本
+ *  2 - 合并表情
+ */
+export enum CastRtfContentType {
+  TEXT = 1,
+  EMOJI = 2
+}
+
+// 富文本
+export interface CastRtfContent {
+  type?: CastRtfContentType;
+  text?: string;
+  url?: string;
+}
+
+export interface DyMessage {
+  id?: string;
+  method?: CastMethod;
+  user?: CastUser;
+  gift?: CastGift;
+  content?: string;
+  rtfContent?: CastRtfContent[];
+  room?: LiveRoom;
+  rank?: LiveRankItem[];
+}
+
+export enum CastMethod {
+  CHAT = 'WebcastChatMessage',
+  GIFT = 'WebcastGiftMessage',
+  LIKE = 'WebcastLikeMessage',
+  MEMBER = 'WebcastMemberMessage',
+  SOCIAL = 'WebcastSocialMessage',
+  ROOM_USER_SEQ = 'WebcastRoomUserSeqMessage',
+  CONTROL = 'WebcastControlMessage',
+  ROOM_RANK = 'WebcastRoomRankMessage',
+  ROOM_STATS = 'WebcastRoomStatsMessage',
+  EMOJI_CHAT = 'WebcastEmojiChatMessage',
+  FANSCLUB = 'WebcastFansclubMessage',
+  ROOM_DATA_SYNC = 'WebcastRoomDataSyncMessage',
+  /** 自定义消息 */
+  CUSTOM = 'CustomMessage'
+}
