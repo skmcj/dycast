@@ -58,6 +58,7 @@ import { verifyRoomNum, verifyWsUrl } from '@/utils/verifyUtil';
 import { ref, useTemplateRef } from 'vue';
 import { getImInfo, getLiveInfo } from '@/core/request';
 import { getSignature } from '@/core/signature';
+import { CLog } from '@/utils/logUtil';
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
 // 转发状态
@@ -141,20 +142,21 @@ const setRoomInfo = function (info?: DyLiveInfo) {
  */
 const connectLive = function () {
   try {
-    console.log(`正在连接房间：${roomNum.value}`);
+    CLog.info(`正在连接房间：${roomNum.value}`);
+    SkMessage.info(`正在连接房间：${roomNum.value}`);
     // 测试获取直播间连接信息
     getLiveInfo(roomNum.value)
       .then(info => {
-        console.log('直播间连接信息1 =>', info);
+        CLog.info('直播间连接信息1 =>', info);
         roomInputStatus.value = true;
-        console.log(getSignature(info.roomId, info.uniqueId));
+        CLog.info('signature =>', getSignature(info.roomId, info.uniqueId));
       })
       .catch(err => {
-        console.log('直播间连接信息获取失败');
+        CLog.info('直播间连接信息获取失败');
         roomInputStatus.value = false;
       });
   } catch (err) {
-    console.log('连接出错');
+    CLog.info('连接出错');
     roomInputStatus.value = false;
   }
 };
