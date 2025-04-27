@@ -57,6 +57,7 @@ import { type ConnectStatus, type DyLiveInfo, type LiveRoom } from '@/core/dycas
 import { verifyRoomNum, verifyWsUrl } from '@/utils/verifyUtil';
 import { ref, useTemplateRef } from 'vue';
 import { getImInfo, getLiveInfo } from '@/core/request';
+import { getSignature } from '@/core/signature';
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
 // 转发状态
@@ -146,10 +147,7 @@ const connectLive = function () {
       .then(info => {
         console.log('直播间连接信息1 =>', info);
         roomInputStatus.value = true;
-        return getImInfo(info.roomId, info.uniqueId);
-      })
-      .then(imInfo => {
-        console.log('直播间连接信息2 =>', imInfo);
+        console.log(getSignature(info.roomId, info.uniqueId));
       })
       .catch(err => {
         console.log('直播间连接信息获取失败');
