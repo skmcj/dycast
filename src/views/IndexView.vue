@@ -56,7 +56,7 @@ import CastList from '@/components/CastList.vue';
 import { type ConnectStatus, type DyLiveInfo, type LiveRoom } from '@/core/dycast';
 import { verifyRoomNum, verifyWsUrl } from '@/utils/verifyUtil';
 import { ref, useTemplateRef } from 'vue';
-import { getLiveInfo } from '@/core/request';
+import { getImInfo, getLiveInfo } from '@/core/request';
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
 // 转发状态
@@ -144,8 +144,12 @@ const connectLive = function () {
     // 测试获取直播间连接信息
     getLiveInfo(roomNum.value)
       .then(info => {
-        console.log('直播间连接信息', info);
+        console.log('直播间连接信息1 =>', info);
         roomInputStatus.value = true;
+        return getImInfo(info.roomId, info.uniqueId);
+      })
+      .then(imInfo => {
+        console.log('直播间连接信息2 =>', imInfo);
       })
       .catch(err => {
         console.log('直播间连接信息获取失败');

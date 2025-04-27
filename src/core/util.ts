@@ -51,3 +51,16 @@ export const parseLiveHtml = function (html: string): DyLiveInfo | null {
     return null;
   }
 };
+
+/**
+ * 将对象化成请求参数字符串
+ *  - 如：item1=value1&item2=value2&...
+ * @param params 请求参数对象
+ * @returns
+ */
+export const makeUrlParams = function (params: any): string {
+  return Object.keys(params).reduce((t, n) => {
+    let r;
+    return `${t}${t ? '&' : ''}${n}=${null != (r = params[n]) ? r : ''}`;
+  }, '');
+};

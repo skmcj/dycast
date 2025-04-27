@@ -39,6 +39,16 @@ export interface DyLiveInfo {
   title: string;
   status: number;
 }
+/** 直播间信息-初次连接信息 */
+export interface DyImInfo {
+  cursor?: string;
+  fetchInterval?: string;
+  now?: string;
+  internalExt?: string;
+  fetchType?: number;
+  pushServer?: string;
+  liveCursor?: string;
+}
 
 /**
  * 送礼点赞榜
