@@ -12,110 +12,181 @@
 
 ## 简介
 
-一个用于获取抖音直播间弹幕的小作品。
+一个用于获取抖音直播间弹幕的小作品
 
-用户只需要输入直播间的房间号，程序就能实时获取对应直播间的弹幕，并将其解析展示出来，用户还可通过`ws/wss`地址将获取的弹幕信息转发到自己的后端已作他用（如：弹幕互动游戏等）。
+用户只需要输入直播间的房间号，程序就能实时获取对应直播间的弹幕，并将其解析展示出来，用户还可通过`ws/wss`地址将获取的弹幕信息转发到自己的后端以作它用（如：弹幕互动游戏、数据分析等）
+
+### 实现功能
+
+- 获取直播间连接信息
+- 连接直播间，获取直播间弹幕
+  - 实现重连机制，能一定程度保证连接的稳定性
+- 转发直播间弹幕
+  - 主要为解析提取后的弹幕，通过序列化`json`的格式
+- 分类展示直播间弹幕
+  - 聊天弹幕(包含文本、普通表情、会员表情、合并表情等)
+  - 礼物弹幕
+  - 关注弹幕
+  - 点赞弹幕(包含点赞数量)
+  - 进入弹幕
+  - 其它信息(如连接过程的一些提示)
+- 展示直播间信息，如人数等
 
 ## 实现原理
 
-主要需解决两个难点，分别为计算抖音弹幕的`wss`链接和解析接收到的二进制弹幕数据。
+主要需解决两个难点，分别为计算抖音弹幕的`wss`链接和解析接收到的二进制弹幕数据
 
 - 计算抖音弹幕的`wss`链接
 
-  - 进入抖音直播间，打开浏览器的网络请求面板，可看到有一个`ws`链接，其则为抖音直播间实时弹幕通信链接。
-  - 观察它的协议地址，主要包含一个最重要的参数`signature`，其需通过`roomId`与`uniqueId`计算得出，通过断点跟随，执行一些逆向工程，即可知道其大致的计算原理。
-  - 本项目将对应计算函数封装暴露在`window.getSign(roomId, uniqueId)`函数下。
-  - 计算出`signature`参数后，再将其与前面的`roomId`与`uniqueId`整合，即可得到完整的`wss`链接。
-  - 之后建立链接，接收数据即可。
+  - 进入抖音直播间，打开浏览器的网络请求面板，可看到有一个`ws`链接，其则为抖音直播间实时弹幕通信链接
+  - 观察它的协议地址，主要包含一个最重要的参数`signature`，其需通过`roomId`与`uniqueId`计算得出，通过断点跟随，执行一些逆向工程，即可知道其大致的计算原理
+  - 本项目将对应计算函数封装在`src/core/signature`文件内
+  - 计算出`signature`参数后，再将其与前面的`roomId`与`uniqueId`整合，即可得到完整的`wss`链接
+  - 之后建立链接，接收数据即可
 
 - 解析弹幕数据
 
-  - 成功建立链接后，会发现接收到的数据为二进制串。
+  - 成功建立链接后，会发现接收到的数据为二进制串
 
-  - 在网上查阅资料可知，其运用技术为`protobuf`协议传输，要解析，需对应的`proto`文件。
+  - 在网上查阅资料可知，其运用技术为`protobuf`协议传输，要解析，需对应的`proto`文件
 
-  - 相应的`proto`文件可通过进入直播间，通过一些逆向工程，模仿其背后解析的对象结构，整合出相应的`proto`文件。
+  - 相应的`proto`文件可通过进入直播间，通过一些逆向工程，模仿其背后解析的对象结构，整合出相应的`proto`文件
 
-  - 具体可自行尝试，如没有思路，可通过一些关键词搜寻，如`PushFrame`、`WebcastChatMessage`等。
+  - 具体可自行尝试，如没有思路，可通过一些关键词搜寻，如`PushFrame`、`WebcastChatMessage`等
 
-  - 得出弹幕数据的`proto`文件后，使用`protoc`将其编译为各种语言的文件。
+  - 得出弹幕数据的`proto`文件后，使用`protoc`或其它一些工具将其编译为各种语言的文件
 
-  - 本项目主要是编译为`js`文件，并使用`browserify`二次编译为浏览器可用文件。
+  - 本项目主要是编译为`ts`文件，通过`protobufjs`进行编译，并对产物进行魔改，将`Long`改为字符串
 
     - ```sh
       # 参考命令
-      protoc --js_out=import_style=commonjs,binary:./ 文件名.proto
-      browserify 文件名_pb.js > 自定义.js
+      pbjs --ts model.ts model.proto
       ```
-
-    - 生成的`[自定义.js]`即可在浏览器引入使用。
-
-  - 有了解析文件后，即可使用其解析弹幕数据。将`ws`获取到的一帧数据解析为`PushFrame`，其中的`payload`依旧为一段二进制数据，且经过了`gzip`压缩，对其进行解压后，解析为`Response`，其中的`MessagesList`即为对应的消息数据，结构为`Messages`类型，其中的`payload`解析后即为具体的弹幕消息体，主要解析类型有`ChatMessage`、`MemberMessage`、`LikeMessage`等。
-
-  - 以上的`PushFrame`、`··· ···`均为弹幕数据的`proto`结构，具体可自行通过一些逆向工程解析。
+    
+  - 生成的`[model.ts]`即可在项目引入使用
+  
+- 有了解析文件后，即可使用其解析弹幕数据。将`ws`获取到的一帧数据解析为`PushFrame`，其中的`payload`依旧为一段二进制数据，且经过了`gzip`压缩，对其进行解压后，解析为`Response`，其中的`messages`即为对应的消息数据，结构为`Message`类型，其中的`payload`解析后即为具体的弹幕消息体，主要解析类型有`ChatMessage`、`MemberMessage`、`LikeMessage`等。
+  
+- 以上的`PushFrame`、`··· ···`均为弹幕数据的`proto`结构，具体可自行了解
 
 ## 数据结构
 
 包装传给后台的数据
 
 ```typescript
-interface Mess {
-  id: number;
-  /**
-   * 消息类型
-   * member - 进入直播间 | social - 关注主播 | chat - 文本弹幕 | gift - 礼物信息 | like - 点赞 | room - 房间统计
-   */
-  type: string | undefined;
-  // 文本内容
-  content: string;
-  // from用户昵称
-  nickname: string;
+/** 最后的整理转发的弹幕消息结构 */
+export interface DyMessage {
+  // 弹幕 ID
+  id?: string;
+  // 弹幕类型
+  method?: CastMethod;
+  // 用户信息
+  user?: CastUser;
+  // 礼物信息(当类型为礼物弹幕时有值)
+  gift?: CastGift;
+  // 弹幕文本
+  content?: string;
+  // 富文本信息
+  rtfContent?: CastRtfContent[];
+  // 房间相关信息
+  room?: LiveRoom;
+  // 礼物排行榜信息
+  rank?: LiveRankItem[];
+}
+
+/** 直播间信息 */
+export interface LiveRoom {
   /**
    * 在线观众数
    */
-  memberCount: number;
+  audienceCount?: number | string;
   /**
-   * 点赞数
+   * 本场点赞数
    */
-  likeCount: number;
+  likeCount?: number | string;
   /**
    * 主播粉丝数
    */
-  followCount: number;
+  followCount?: number | string;
   /**
    * 累计观看人数
    */
-  totalUserCount: number;
-  // 送礼、点赞排行榜信息
-  rank: RankItem[];
-  // 礼物信息
-  gift: Gift;
+  totalUserCount?: number | string;
+  /** 房间状态 */
+  status?: number;
 }
-
-interface Gift {
-  // 礼物名称
-  name: string;
-  // 礼物数量
-  count: number;
-  // 礼物图片链接
-  url: string;
-  // 描述
-  desc: string;
-  // 礼物单个价值-抖音币
-  diamondCount?: number;
-}
-
-interface RankItem {
-  // 用户昵称
+/**
+ * 送礼点赞榜
+ */
+export interface LiveRankItem {
   nickname: string;
-  // 用户头像
   avatar: string;
-  // 用户排名
-  rank: number;
+  rank: number | string;
+}
+
+export interface CastUser {
+  // user.sec_uid | user.id_str
+  id?: string;
+  // user.nickname
+  name?: string;
+  // user.avatar_thumb.url_list.0
+  avatar?: string;
+  // 性别(猜测) 0 | 1 | 2 => 未知 | 男 | 女
+  gender?: number;
+}
+
+export interface CastGift {
+  id?: string;
+  name?: string;
+  // 价值抖音币 diamond_count
+  price?: number;
+  type?: number;
+  // 描述
+  desc?: string;
+  // 图片
+  icon?: string;
+  // 数量 repeat_count | combo_count
+  count?: number | string;
+  // 礼物消息可能重复发送，0 表示第一次，未重复
+  repeatEnd?: number;
+}
+
+/**
+ * 富文本类型
+ *  1 - 普通文本
+ *  2 - 合并表情
+ */
+export enum CastRtfContentType {
+  TEXT = 1,
+  EMOJI = 2
+}
+
+// 富文本
+export interface CastRtfContent {
+  type?: CastRtfContentType;
+  text?: string;
+  url?: string;
+}
+// 弹幕类型
+export enum CastMethod {
+  CHAT = 'WebcastChatMessage',
+  GIFT = 'WebcastGiftMessage',
+  LIKE = 'WebcastLikeMessage',
+  MEMBER = 'WebcastMemberMessage',
+  SOCIAL = 'WebcastSocialMessage',
+  ROOM_USER_SEQ = 'WebcastRoomUserSeqMessage',
+  CONTROL = 'WebcastControlMessage',
+  ROOM_RANK = 'WebcastRoomRankMessage',
+  ROOM_STATS = 'WebcastRoomStatsMessage',
+  EMOJI_CHAT = 'WebcastEmojiChatMessage',
+  FANSCLUB = 'WebcastFansclubMessage',
+  ROOM_DATA_SYNC = 'WebcastRoomDataSyncMessage',
+  /** 自定义消息 */
+  CUSTOM = 'CustomMessage'
 }
 ```
 
-**注意：** 理论上，接收的原始弹幕数据包含抖音弹幕该有的全部数据，但传递给后台的目前只包装了以上较为重要的数据，如需其它数据，可自行研究包装修改，目标文件为`client.ts`。
+**注意：** 理论上，接收的原始弹幕数据包含抖音弹幕该有的全部数据，但传递给后台的目前只提取包装了以上较为重要的数据，如需其它数据，可自行研究包装修改，目标文件为`src/core/dycast.ts`
 
 ## 项目预览
 
@@ -123,17 +194,17 @@ interface RankItem {
 
 - 项目运行后，具体界面展示如下
 
-  ![主界面](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/dydm-o.png)
+  ![主界面](https://static.ltgcm.top/md/20250428180514.png)
 
-  - 整体界面为左右布局，左侧为操作区域，右侧为展示区域。
-  - 左侧主要包含两个输入框，第一个为房间号输入框，第二个为转发地址输入框；底部房间信息主要用于连接成功后展示房间信息。
-  - 右侧为连接成功后的弹幕结果展示区域
+  - 整体界面为三栏布局：左侧为直播间信息及连接状态展示；中间为主要弹幕展示；右侧为输入及其它信息展示
+  - 右侧主要包含两个输入框，第一个为房间号输入框，第二个为转发地址输入框；输入带有格式验证，格式不正确无法连接
+  - 弹幕展示列表右侧的一排图标按钮表示当前列表所展示的弹幕类型，点击可控制其显隐
 
-- 在左侧房间号输入框输入房间号后，点击**连接**，等待`1.5s`后，会在下方房间信息展示连接结果，有时可能出现网络拥堵情况，连接失败则再次点击连接即可，正常第二次就能成功。连接成功后，展示如下：
+- 在右侧房间号输入框输入房间号后，点击**连接**，等待几秒后，会在左下方状态信息展示连接结果，有时可能出现网络拥堵情况，稍后再连接即可，正常连接成功/失败均会有相应的消息通知提示，也可以看控制台输出。连接成功后，大致展示如下：
 
-  ![结果](https://gcore.jsdelivr.net/gh/skmcj/pic-bed/common/dydm-c.png)
+  ![结果](https://static.ltgcm.top/md/20250428181510.png)
 
-- 此时，用户可在转发信息框填入自己的`WebSocket`服务端地址，点击**转发**，即可建立连接，将弹幕信息实时传送到所设置后端。
+- 此时，用户可在转发信息框填入自己的`WebSocket`服务端地址，点击**转发**，即可建立连接，将弹幕信息实时传送到所设置后端
 
 ## 部署步骤
 
@@ -165,33 +236,67 @@ interface RankItem {
       # 监听地址，可以是域名或ip地址，可正则书写
       server_name  localhost;
   
-      # 配置项目根路径资源
       location / {
           add_header Access-Control-Allow-Origin *;
-          # 根目录，可以是项目的本地路径
+          # 根目录，即项目打包内容位置(···/dist)，可以是项目的本地路径
           root   /var/dycast;
           # 配置默认主页文件
           index  index.html index.htm;
           # 配置单页面应用刷新问题，默认返回主页
           try_files $uri $uri/ /index.html;
       }
+      
       # 配置接口跨域
-      # 将 /dy/ 路径下的请求代理到 https://live.douyin.com/
-      location /dy/ {
+      location /dylive {
+          # proxy_pass 你要跨域的的接口地址
+          proxy_pass https://live.douyin.com/;
+  
           # 响应头大小
           proxy_buffer_size 64k;
           # 响应体大小 = 数量 * size
           proxy_buffers   32 64k;
           # 处于busy状态的buffer大小，一般为 proxy_buffer_size * 2
           proxy_busy_buffers_size 128k;
-          # proxy_pass 你要跨域的的接口地址
-          proxy_pass https://live.douyin.com/;
+  
+          # 修改请求头
+          proxy_set_header Host live.douyin.com;
+          proxy_set_header Referer 'https://live.douyin.com/';
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  
+          # 处理响应 Set-Cookie
+          # 确保 Set-Cookie 能正常设置到当前域下
+          # 清空 Domain
+          proxy_cookie_domain ~. "";
+          # 统一 Path
+          proxy_cookie_path / /;
+          proxy_pass_header Set-Cookie;
+          
+  
+          # 重写路径 - 移除/dylive前缀
+          rewrite ^/dylive/(.*) /$1 break;
       }
+  
   }
   ```
-
   
+
+## Star History
+
+![Star History Chart](https://api.star-history.com/svg?repos=skmcj/dycast&type=Date)
+
+## 打赏
+
+<p align=center>
+  <img src="https://static.ltgcm.top/md/20250428191027.png" alt="打赏" style="width: 350px">
+</p>
+
+<p align=center style="color: #68945c;">
+   如果想支持本项目的持续维护，可以投喂UP (｀･ω･´)ゞ敬礼っ
+</p>
+
+
 
 ## 免责声明
 
-本项目仅用于学习交流使用，禁止一切非法滥用，否则后果自负。
+本项目仅用于学习交流使用，禁止一切非法滥用，否则后果自负
