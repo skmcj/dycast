@@ -60,6 +60,7 @@ export interface LiveRoom {
 
 /** 直播间信息-连接信息 */
 export interface DyLiveInfo {
+  roomNum?: string;
   roomId: string;
   uniqueId: string;
   avatar: string;
@@ -1119,6 +1120,16 @@ export class DyCast {
       type,
       code,
       msg
+    };
+  }
+
+  /**
+   * 获取直播间信息
+   */
+  public getLiveInfo(): DyLiveInfo {
+    return {
+      ...this.info,
+      roomNum: this.roomNum
     };
   }
 }

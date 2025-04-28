@@ -67,6 +67,7 @@ import { verifyRoomNum, verifyWsUrl } from '@/utils/verifyUtil';
 import { ref, useTemplateRef } from 'vue';
 import { CLog } from '@/utils/logUtil';
 import { getId } from '@/utils/idUtil';
+import { RelayCast } from '@/core/relay';
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
 // 转发状态
@@ -101,6 +102,8 @@ const allCasts: DyMessage[] = [];
 const castSet = new Set<string>();
 // 弹幕客户端
 let castWs: DyCast | undefined;
+// 转发客户端
+let relayWs: RelayCast | undefined;
 
 /**
  * 验证房间号
@@ -215,6 +218,9 @@ const handleMessages = function (msgs: DyMessage[]) {
   allCasts.push(...newCasts);
   if (castRef.value) castRef.value.appendCasts(mainCasts);
   if (otherRef.value) otherRef.value.appendCasts(otherCasts);
+  if (relayWs && relayWs.isConnected()) {
+    relayWs.send(JSON.stringify(msgs));
+  }
 };
 
 /**
@@ -251,6 +257,7 @@ const connectLive = function () {
     // 清空上一次连接的消息
     clearMessageList();
     CLog.debug('正在连接:', roomNum.value);
+    SkMessage.info(`正在连接：${roomNum.value}`);
     const cast = new DyCast(roomNum.value);
     cast.on('open', (ev, info) => {
       CLog.info('DyCast 房间连接成功');
@@ -323,9 +330,50 @@ const disconnectLive = function () {
 };
 
 /** 连接转发房间 */
-const relayCast = function () {};
+const relayCast = function () {
+  try {
+    CLog.info('正在连接转发中 =>', relayUrl.value);
+    SkMessage.info(`转发连接中: ${relayUrl.value}`);
+    const cast = new RelayCast(relayUrl.value);
+    cast.on('open', () => {
+      CLog.info(`DyCast 转发连接成功`);
+      SkMessage.success(`已开始转发`);
+      relayInputStatus.value = true;
+      relayStatus.value = 1;
+      addConsoleMessage('转发客户端已连接');
+      if (castWs) {
+        // 发送直播间信息给转发地址
+        cast.send(JSON.stringify(castWs.getLiveInfo()));
+      }
+    });
+    cast.on('close', (code, msg) => {
+      CLog.info(`(${code})dycast 转发已关闭: ${msg || '未知原因'}`);
+      if (code === 1000) SkMessage.info(`已停止转发`);
+      else SkMessage.warning(`转发已停止: ${msg || '未知原因'}`);
+      relayInputStatus.value = false;
+      relayStatus.value = 0;
+      addConsoleMessage('转发已关闭');
+    });
+    cast.on('error', ev => {
+      CLog.warn(`dycast 转发出错: ${ev.message}`);
+      SkMessage.error(`转发出错了: ${ev.message}`);
+      relayInputStatus.value = false;
+      relayStatus.value = 2;
+    });
+    cast.connect();
+    relayWs = cast;
+  } catch (err) {
+    CLog.error('弹幕转发出错:', err);
+    SkMessage.error('转发出错: ${err.message}');
+    relayInputStatus.value = false;
+    relayStatus.value = 2;
+    relayWs = void 0;
+  }
+};
 /** 暂停转发 */
-const stopRelayCast = function () {};
+const stopRelayCast = function () {
+  if (relayWs) relayWs.close(1000);
+};
 </script>
 
 <style lang="scss" scoped>
