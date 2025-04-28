@@ -22,20 +22,20 @@
     <div class="view-right">
       <div class="view-input">
         <ConnectInput
+          ref="roomInput"
           label="房间号"
           placeholder="请输入房间号"
           v-model:value="roomNum"
-          v-model:status="roomInputStatus"
           :test="verifyRoomNumber"
           @confirm="connectLive"
           @cancel="disconnectLive" />
         <ConnectInput
+          ref="relayInput"
           label="WS地址"
           placeholder="请输入转发地址"
           confirm-text="转发"
           cancel-text="停止"
           v-model:value="relayUrl"
-          v-model:status="relayInputStatus"
           :test="verifyWssUrl"
           @confirm="relayCast"
           @cancel="stopRelayCast" />
@@ -75,10 +75,10 @@ const relayStatus = ref<ConnectStatus>(0);
 // 房间号
 const roomNum = ref<string>('');
 // 房间号输入框状态
-const roomInputStatus = ref<boolean>(false);
+const roomInputRef = useTemplateRef('roomInput');
 // 转发地址
 const relayUrl = ref<string>('');
-const relayInputStatus = ref<boolean>(false);
+const relayInputRef = useTemplateRef('relayInput');
 // 状态面板
 const statusPanelRef = useTemplateRef('panel');
 
@@ -130,6 +130,16 @@ function verifyWssUrl(value: string) {
     return { flag, message: '转发地址错误' };
   }
 }
+
+/** 设置房间号输入框状态 */
+const setRoomInputStatus = function (flag?: boolean) {
+  if (roomInputRef.value) roomInputRef.value.setStatus(flag);
+};
+
+/** 设置转发地址输入框状态 */
+const setRelayInputStatus = function (flag?: boolean) {
+  if (relayInputRef.value) relayInputRef.value.setStatus(flag);
+};
 
 /**
  * 设置房间统计信息
@@ -262,7 +272,7 @@ const connectLive = function () {
     cast.on('open', (ev, info) => {
       CLog.info('DyCast 房间连接成功');
       SkMessage.success(`房间连接成功[${roomNum.value}]`);
-      roomInputStatus.value = true;
+      setRoomInputStatus(true);
       connectStatus.value = 1;
       setRoomInfo(info);
       addConsoleMessage('直播间已连接');
@@ -271,12 +281,12 @@ const connectLive = function () {
       CLog.error('DyCast 连接出错 =>', err);
       SkMessage.error(`连接出错: ${err}`);
       connectStatus.value = 2;
-      roomInputStatus.value = false;
+      setRoomInputStatus(false);
     });
     cast.on('close', (code, reason) => {
       CLog.info(`DyCast 房间已关闭[${code}] => ${reason}`);
       connectStatus.value = 3;
-      roomInputStatus.value = false;
+      setRoomInputStatus(false);
       switch (code) {
         case DyCastCloseCode.NORMAL:
           SkMessage.success('断开成功');
@@ -320,7 +330,7 @@ const connectLive = function () {
   } catch (err) {
     CLog.error('房间连接过程出错:', err);
     SkMessage.error('房间连接过程出错');
-    roomInputStatus.value = false;
+    setRoomInputStatus(false);
     castWs = void 0;
   }
 };
@@ -338,7 +348,7 @@ const relayCast = function () {
     cast.on('open', () => {
       CLog.info(`DyCast 转发连接成功`);
       SkMessage.success(`已开始转发`);
-      relayInputStatus.value = true;
+      setRelayInputStatus(true);
       relayStatus.value = 1;
       addConsoleMessage('转发客户端已连接');
       if (castWs) {
@@ -350,14 +360,14 @@ const relayCast = function () {
       CLog.info(`(${code})dycast 转发已关闭: ${msg || '未知原因'}`);
       if (code === 1000) SkMessage.info(`已停止转发`);
       else SkMessage.warning(`转发已停止: ${msg || '未知原因'}`);
-      relayInputStatus.value = false;
+      setRelayInputStatus(false);
       relayStatus.value = 0;
       addConsoleMessage('转发已关闭');
     });
     cast.on('error', ev => {
       CLog.warn(`dycast 转发出错: ${ev.message}`);
       SkMessage.error(`转发出错了: ${ev.message}`);
-      relayInputStatus.value = false;
+      setRelayInputStatus(false);
       relayStatus.value = 2;
     });
     cast.connect();
@@ -365,7 +375,7 @@ const relayCast = function () {
   } catch (err) {
     CLog.error('弹幕转发出错:', err);
     SkMessage.error('转发出错: ${err.message}');
-    relayInputStatus.value = false;
+    setRelayInputStatus(false);
     relayStatus.value = 2;
     relayWs = void 0;
   }

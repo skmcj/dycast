@@ -55,7 +55,7 @@ const inputDisabled = ref<boolean>(false);
 /** 按钮状态 */
 const btnDisabled = ref<boolean>(false);
 /** 连接状态 */
-const connectStatus = defineModel<boolean>('status');
+const connectStatus = ref<boolean>(false);
 /** 验证提示 */
 const testTip = ref<string | undefined>(void 0);
 /** event */
@@ -111,20 +111,25 @@ const handleChange = (e: Event) => {
   emits('change', e);
 };
 
-/** 监听连接状态 */
-watch(connectStatus, flag => {
+/**
+ * 设置连接状态
+ * @param flag
+ */
+const setStatus = function (flag?: boolean) {
   if (flag) {
     // 连接成功
     // 锁定输入框，防止再次输入
     inputDisabled.value = true;
+    connectStatus.value = true;
   } else {
     // 连接失败
     // 解锁输入框
     inputDisabled.value = false;
+    connectStatus.value = false;
   }
   // 还原按钮状态
   btnDisabled.value = false;
-});
+};
 
 /** 初始化数据 */
 const initData = function () {
@@ -133,6 +138,10 @@ const initData = function () {
 
 onMounted(() => {
   initData();
+});
+
+defineExpose({
+  setStatus
 });
 </script>
 
