@@ -8,7 +8,7 @@ import type { DyLiveInfo } from './dycast';
 export const parseLiveHtml_old = function (html: string): DyLiveInfo | null {
   try {
     const matchRes = html.match(
-      /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?)\]\\n"\]\)<\/script>/
+      /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?state[\s\S]+?)\]\\n"\]\)<\/script>/
     );
     const REGLIST = [
       {
@@ -60,7 +60,7 @@ export const parseLiveHtml_old = function (html: string): DyLiveInfo | null {
 export const parseLiveHtml = function (html: string): DyLiveInfo | null {
   try {
     const matchRes = html.match(
-      /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?)\]\\n"\]\)<\/script>/
+      /<script\snonce="\S+?"\s>self\.__pace_f\.push\(\[1,"[a-z]?:\[\\"\$\\",\\"\$L\d+\\",null,([\s\S]+?state[\s\S]+?)\]\\n"\]\)<\/script>/
     );
     if (!matchRes) return null;
     let json: string = matchRes[1];
