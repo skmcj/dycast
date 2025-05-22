@@ -281,6 +281,27 @@ $darkText: #a5a5a5;
     .title {
       color: $darkText;
     }
+    .cast-list-main {
+      .scroller {
+        &::-webkit-scrollbar {
+          width: 5px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #3f3f3f; // 滑块颜色
+          border-radius: 2.5px; // 滑块圆角
+        }
+        &::-webkit-scrollbar-thumb:hover {
+          background: #595959;
+        }
+        &::-webkit-scrollbar-thumb:active {
+          background: #616161;
+        }
+        &::-webkit-scrollbar-track {
+          background: rgba(61, 61, 61, 0.5);
+          border-radius: 2.5px; // 滑块圆角
+        }
+      }
+    }
   }
 }
 .cast-list-header {
@@ -341,10 +362,38 @@ $darkText: #a5a5a5;
     &::-webkit-scrollbar {
       width: 5px;
     }
-
     &::-webkit-scrollbar-thumb {
       background: #ccc; // 滑块颜色
       border-radius: 2.5px; // 滑块圆角
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #bbb;
+    }
+    &::-webkit-scrollbar-thumb:active {
+      background: #999;
+    }
+    &::-webkit-scrollbar-track {
+      background: rgba(217, 217, 217, 0.3);
+      border-radius: 2.5px; // 滑块圆角
+    }
+  }
+}
+
+@-moz-document url-prefix() {
+  .cast-list-main {
+    .scroller {
+      scrollbar-width: thin;
+      scrollbar-color: #ccc rgba(217, 217, 217, 0.3);
+    }
+  }
+  .cast-list {
+    &.theme-dark {
+      .cast-list-main {
+        .scroller {
+          scrollbar-width: thin;
+          scrollbar-color: #4f4f4f rgba(61, 61, 61, 0.5);
+        }
+      }
     }
   }
 }
