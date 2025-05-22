@@ -276,6 +276,28 @@ export enum CastMethod {
           # 重写路径 - 移除/dylive前缀
           rewrite ^/dylive/(.*) /$1 break;
       }
+      
+      location /socket {
+          # Nginx 不区分 ws / wss 协议
+          # WebSocket 实际上是通过 HTTP 升级实现的
+          # 故使用 https:// 非 wss://
+          proxy_pass https://webcast5-ws-web-lf.douyin.com/;
+  
+          # WebSocket 关键配置
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+  
+          # 跨域相关头
+          proxy_set_header Origin https://live.douyin.com;
+          proxy_set_header Host webcast5-ws-web-lf.douyin.com;
+  
+          # 可选：保留 Cookie 头，用于认证
+          proxy_set_header Cookie $http_cookie;
+  
+          # 重写路径 - 移除/socket
+          rewrite ^/socket/(.*) /$1 break;
+      }
   
   }
   ```

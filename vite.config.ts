@@ -39,6 +39,13 @@ export default defineConfig({
             }
           });
         }
+      },
+      '/socket': {
+        target: 'wss://webcast5-ws-web-lf.douyin.com',
+        changeOrigin: true, // 保持原始 Host，利于服务端识别 Cookie
+        secure: true,
+        ws: true, // 启用 WebSocket 代理
+        rewrite: path => path.replace(/^\/socket/, '')
       }
     }
   }

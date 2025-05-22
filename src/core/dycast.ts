@@ -305,7 +305,8 @@ enum PayloadType {
 }
 
 /** API */
-const BASE_URL = 'wss://webcast5-ws-web-lf.douyin.com/webcast/im/push/v2/';
+// const BASE_URL = 'wss://webcast5-ws-web-lf.douyin.com/webcast/im/push/v2/';
+const BASE_URL = `${location.origin.replace(/^http/, 'ws')}/socket/webcast/im/push/v2/`;
 
 /** SDK 版本 */
 const VERSION = '1.0.14-beta.0';
