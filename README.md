@@ -263,13 +263,26 @@ export enum CastMethod {
           proxy_set_header Referer 'https://live.douyin.com/';
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          # 如果需要配置移动端打开也能用
+          # 需设置请求头 User-Agent，伪装 PC 端 UA，防止移动端重定向
+          set $ua $http_user_agent;
+          if ($http_user_agent ~* "(iphone|ipad|android|mobile)") {
+              set $ua "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0";
+          }
+          proxy_set_header User-Agent $ua;
   
           # 处理响应 Set-Cookie
           # 确保 Set-Cookie 能正常设置到当前域下
           # 清空 Domain
-          proxy_cookie_domain ~. "";
+          proxy_cookie_domain ~.* $host;
           # 统一 Path
           proxy_cookie_path / /;
+          
+          # 清除 SameSite / Secure
+          # 不一定都需要设置，某些浏览器需要
+          # 可借助 ngx_headers_more 模块实现
+  
+          # 确保 Set-Cookie 被转发到客户端
           proxy_pass_header Set-Cookie;
           
   
@@ -294,6 +307,12 @@ export enum CastMethod {
   
           # 可选：保留 Cookie 头，用于认证
           proxy_set_header Cookie $http_cookie;
+          
+          set $ua $http_user_agent;
+          if ($http_user_agent ~* "(iphone|ipad|android|mobile)") {
+              set $ua "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0";
+          }
+          proxy_set_header User-Agent $ua;
   
           # 重写路径 - 移除/socket
           rewrite ^/socket/(.*) /$1 break;

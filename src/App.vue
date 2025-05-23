@@ -15,7 +15,7 @@ setTimeout(() => {
 </script>
 
 <style lang="scss">
-body::selection {
+::selection {
   background-color: #8b968d;
   color: #fff;
 }
