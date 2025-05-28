@@ -68,6 +68,8 @@ import { ref, useTemplateRef } from 'vue';
 import { CLog } from '@/utils/logUtil';
 import { getId } from '@/utils/idUtil';
 import { RelayCast } from '@/core/relay';
+import SkMessage from '@/components/Message';
+
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
 // 转发状态
