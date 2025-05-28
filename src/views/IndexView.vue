@@ -11,6 +11,11 @@
         :user-count="userCount"
         :like-count="likeCount" />
       <div class="view-left-bottom">
+        <div class="view-left-tools">
+          <div class="view-left-tool" title="保存弹幕" @click.stop="saveCastToFile">
+            <i class="ice-save"></i>
+          </div>
+        </div>
         <hr class="hr" />
         <LiveStatusPanel ref="panel" :status="connectStatus" />
       </div>
@@ -69,6 +74,8 @@ import { CLog } from '@/utils/logUtil';
 import { getId } from '@/utils/idUtil';
 import { RelayCast } from '@/core/relay';
 import SkMessage from '@/components/Message';
+import { formatDate } from '@/utils/commonUtil';
+import FileSaver from '@/utils/fileUtil';
 
 // 连接状态
 const connectStatus = ref<ConnectStatus>(0);
@@ -386,11 +393,48 @@ const relayCast = function () {
 const stopRelayCast = function () {
   if (relayWs) relayWs.close(1000);
 };
+
+/** 将弹幕保存到本地文件 */
+const saveCastToFile = function () {
+  if (connectStatus.value === 1) {
+    SkMessage.warning('请断开连接后再保存');
+    return;
+  }
+  const len = allCasts.length;
+  if (len <= 0) {
+    SkMessage.warning('暂无弹幕需要保存');
+    return;
+  }
+  const date = formatDate(new Date(), 'yyyy-MM-dd_HHmmss');
+  const fileName = `[${roomNum.value}]${date}(${len})`;
+  const data = JSON.stringify(allCasts, null, 2);
+  FileSaver.save(data, {
+    name: fileName,
+    ext: '.json',
+    mimeType: 'application/json',
+    description: '弹幕数据',
+    existStrategy: 'new'
+  })
+    .then(res => {
+      if (res.success) {
+        SkMessage.success('弹幕保存成功');
+      } else {
+        SkMessage.error('弹幕保存失败');
+        CLog.error('弹幕保存失败 =>', res.message);
+      }
+    })
+    .catch(err => {
+      SkMessage.error('弹幕保存出错了');
+      CLog.error('弹幕保存出错了 =>', err);
+    });
+};
 </script>
 
 <style lang="scss" scoped>
 $bg: #f7f6f5;
 $bd: #b2bfc3;
+$theme: #68be8d;
+$tool: #8b968d;
 
 .index-view {
   position: relative;
@@ -424,6 +468,36 @@ $bd: #b2bfc3;
       border: 0;
       border-top: 1px solid $bd;
       margin: 5px 0;
+    }
+  }
+  .view-left-tools {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    box-sizing: border-box;
+    padding: 0 12px;
+  }
+  .view-left-tool {
+    font-size: 21px;
+    width: 1.2em;
+    height: 1.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $tool;
+    transition: color 0.2s ease-in-out, background-color 0.3s ease-in-out, opacity 0.2s ease;
+    background-color: transparent;
+    border-radius: 0.4em;
+    i {
+      font-size: 1em;
+    }
+    &:hover {
+      color: #fff;
+      background-color: $theme;
+    }
+    &:active {
+      opacity: 0.8;
     }
   }
   .view-center {

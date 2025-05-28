@@ -29,10 +29,10 @@ import { getSignature } from './signature';
 
 /**
  * 连接状态
- *  0 - 未连接
- *  1 - 连接中(连接完成)
- *  2 - 连接失败
- *  3 - 已断开
+ *  - 0 - 未连接
+ *  - 1 - 连接中(连接完成)
+ *  - 2 - 连接失败
+ *  - 3 - 已断开
  */
 export type ConnectStatus = 0 | 1 | 2 | 3;
 

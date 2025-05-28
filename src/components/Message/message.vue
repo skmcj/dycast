@@ -321,7 +321,7 @@ $lrMargin: 12px;
 @media (max-width: 768px) {
   .sk-message-content {
     text-align: center;
-    width: min-content;
+    // width: min-content;
   }
 }
 </style>
